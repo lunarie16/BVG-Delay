@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dataaccess-bvg
+spec:
+  containers:
+    - name: alpine
+      image: alpine:latest
+      command: ["sleep", "infinity"]
+      volumeMounts:
+        - name: bvg-scraper-data
+          mountPath: /data
+  volumes:
+    - name: bvg-scraper-data
+      persistentVolumeClaim:
+        claimName: bvg-scraper-data

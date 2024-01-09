@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bvg-delay
+spec:
+  restartPolicy: Never
+  containers:
+    - name: bvg-delay
+      # image: huggingface/transformers-pytorch-gpu
+      image:  python:3.11
+      ports:
+        - containerPort: 8888
+      volumeMounts:
+      - name: bvg-scraper-data  # This should match the volume name defined below
+        mountPath: /src  # Specify the mount path inside the container
+      command:
+      - sh
+      - -c
+      - |
+        pip3 install jupyter kaleido numpy pandas plotly && \
+        cd /src && \
+        jupyter notebook --ip=0.0.0.0 --no-browser --NotebookApp.token='' --allow-root
+      resources:
+          requests:
+            nvidia.com/gpu: 1 # requesting 1 GPU
+            cpu: 2
+            memory: 64Gi
+          limits:
+            nvidia.com/gpu: 1
+            memory: 128Gi
+            cpu: 8
+  volumes:
+  - name: bvg-scraper-data  # This should match the volume name used in the container
+    persistentVolumeClaim:
+      claimName: bvg-scraper-data
+  nodeSelector:
+    gpu: v100

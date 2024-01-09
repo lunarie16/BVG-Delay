@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bvg-scraper
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+        - name: bvg-scraper
+          image: registry.datexis.com/mmenke/bvg-scraper:0.0.13
+          command: ["/bin/sh", "-c"]
+          args: ["python src/handle_departures.py" ]
+          volumeMounts:
+            - name: bvg-scraper-data
+              mountPath: /data
+            - name: root-temp
+              mountPath: /root
+          resources:
+            requests:
+              nvidia.com/gpu: 0
+              cpu: 1
+              memory: 8Gi
+            limits:
+              nvidia.com/gpu: 0
+              memory: 16Gi
+              cpu: 2
+      imagePullSecrets:
+        - name: private-registry-auth
+      restartPolicy: Never
+      nodeSelector:
+        gpu: k80
+      volumes:
+        - name: bvg-scraper-data
+          persistentVolumeClaim:
+            claimName: bvg-scraper-data
+        - name: root-temp
+          persistentVolumeClaim:
+            claimName: root-temp
